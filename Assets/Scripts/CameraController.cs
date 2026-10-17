@@ -31,10 +31,6 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            CursorLock();
-        }
         Vector2 lookInput = _lookAction.action.ReadValue<Vector2>();
         float mouseX = lookInput.x * _sensitivity;
         float mouseY = lookInput.y * _sensitivity;
@@ -45,19 +41,5 @@ public class CameraController : MonoBehaviour
         _pitch = Mathf.Clamp(_pitch, _minPitch, _maxPitch);
 
         _cameraPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
-    }
-
-    private void CursorLock()
-    {
-        if (Cursor.visible)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 }
