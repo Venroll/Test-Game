@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XR;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -11,6 +10,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _gravity = -20f;
     [SerializeField] private float _jumpHeight = 1.5f;
+
+    [Header("Animator")]
+    [SerializeField] private Animator _animator;
+    [SerializeField] private string _speedParam = "Speed";
 
     [Header("Links")]
     [SerializeField] private InputActionReference _moveAction;
@@ -33,6 +36,11 @@ public class PlayerMovement : MonoBehaviour
         Vector3 direction = transform.right * input.x + transform.forward * input.y;
         direction = direction.normalized;
 
+        if (_animator != null) {
+            float animSpeed = input.magnitude;
+            _animator.SetFloat(_speedParam, animSpeed, 0.1f, Time.deltaTime);
+        }
+
         if (_charController.isGrounded && _verticalVelocity < 0f)
         {
             _verticalVelocity = -2f;
@@ -46,5 +54,10 @@ public class PlayerMovement : MonoBehaviour
         Vector3 velocity = direction * _moveSpeed + Vector3.up * _verticalVelocity; 
 
         _charController.Move(velocity * Time.deltaTime);
+    }
+
+    public void DisableMovement()
+    {
+        enabled = false;
     }
 }

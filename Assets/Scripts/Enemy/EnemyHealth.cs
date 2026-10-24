@@ -1,20 +1,27 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PlayerHealth : MonoBehaviour, IDamagable
+public class EnemyHealth : MonoBehaviour, IDamagable
 {
     [SerializeField] private float _maxHealth;
     private float _health;
 
-    [Header("Events")]
-    [SerializeField] private UnityEvent<float> HpChangedPercent;
-    public float Health { 
+    private bool isDead = false;
+
+    public float Health
+    {
         get { return _health; }
         private set { _health = value; }
     }
-    public float MaxHealth { 
-        get { return _maxHealth; } 
+    public float MaxHealth
+    {
+        get { return _maxHealth; }
         private set { _maxHealth = value; }
+    }
+    public bool IsDead
+    {
+        get { return isDead; }
+        set { isDead = value; }
     }
 
     private void Start()
@@ -23,13 +30,14 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     }
     public void TakeDamage(float damage, GameAgent sender)
     {
+        if (IsDead) { return; }
+
         Debug.Log($"{gameObject.name} took damage: {damage} from {sender.name}: {sender.entityFaction}");
         Health -= damage;
-        HpChangedPercent?.Invoke(_health / _maxHealth);
         if (Health <= 0)
         {
-            Debug.Log("Player is dead");
-            Destroy(gameObject);
+            IsDead = true;
+            Debug.Log($"{gameObject.name} is dead");
         }
     }
 }

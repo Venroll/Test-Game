@@ -42,4 +42,9 @@ public class CameraController : MonoBehaviour
 
         _cameraPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
     }
+
+    public void DisableCamera()
+    {
+        enabled = false;
+    }
 }
