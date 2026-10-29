@@ -40,11 +40,9 @@ public class EnemyPatrol : MonoBehaviour
             return;
         }
 
-        if (_agent.hasPath &&
-            _agent.remainingDistance <= _pointReachDistance)
+        if (_agent.hasPath && _agent.remainingDistance <= _pointReachDistance)
         {
-            _currentPointIndex =
-                (_currentPointIndex + 1) % _points.Length;
+            _currentPointIndex = (_currentPointIndex + 1) % _points.Length;
 
             _destinationSet = false;
         }
@@ -67,9 +65,7 @@ public class EnemyPatrol : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning(
-                $"{name}: не удалось задать путь к точке {point.name}"
-            );
+            Debug.LogWarning($"{name}: не удалось задать путь к точке {point.name}");
         }
     }
 

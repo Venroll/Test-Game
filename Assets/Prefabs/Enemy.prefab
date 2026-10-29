@@ -1096,6 +1096,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   _maxHealth: 50
+  _enemyAnim: {fileID: 545359834072134227}
 --- !u!195 &5646444051154678347
 NavMeshAgent:
   m_ObjectHideFlags: 0

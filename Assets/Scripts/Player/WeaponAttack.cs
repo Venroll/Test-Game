@@ -30,8 +30,7 @@ public class WeaponAttack : MonoBehaviour
 
     private void Update()
     {
-        if (Mouse.current != null &&
-            Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             TryAttack();
         }
@@ -49,18 +48,11 @@ public class WeaponAttack : MonoBehaviour
     }
     public void DealDamage()
     {
-        Vector3 origin = attackPoint != null
-            ? attackPoint.position
-            : transform.position + Vector3.up;
+        Vector3 origin = attackPoint != null ? attackPoint.position : transform.position + Vector3.up;
 
-        Vector3 hitPosition =
-            origin + transform.forward * _attackRange;
+        Vector3 hitPosition = origin + transform.forward * _attackRange;
 
-        Collider[] hits = Physics.OverlapSphere(
-            hitPosition,
-            hitRadius,
-            targetLayers
-        );
+        Collider[] hits = Physics.OverlapSphere(hitPosition,hitRadius,targetLayers);
 
         HashSet<IDamagable> damagedTargets = new HashSet<IDamagable>();
 

@@ -4,6 +4,7 @@ using UnityEngine.Events;
 public class EnemyHealth : MonoBehaviour, IDamagable
 {
     [SerializeField] private float _maxHealth;
+    [SerializeField] private EnemyAnimator _enemyAnim;
     private float _health;
 
     private bool isDead = false;
@@ -39,5 +40,6 @@ public class EnemyHealth : MonoBehaviour, IDamagable
             IsDead = true;
             Debug.Log($"{gameObject.name} is dead");
         }
+        _enemyAnim?.PlayHit();
     }
 }
