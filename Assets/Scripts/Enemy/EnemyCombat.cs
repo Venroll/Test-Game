@@ -1,7 +1,7 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.GraphicsBuffer;
 
 public class EnemyCombat : MonoBehaviour
 {
@@ -17,6 +17,11 @@ public class EnemyCombat : MonoBehaviour
     [SerializeField] private float _attackCooldown = 1.2f;
     [SerializeField] private float _attackDistance = 2f;
 
+    [Header("Rotation")]
+    [SerializeField] private Transform _enemyVisuals;
+    [SerializeField] private float _rotationSpeed = 360f;
+    [SerializeField] private float _rotationThreshold = 5f;
+
     private Transform _target;
     private float _nextAttackTime;
     private bool _isAttacking;
@@ -26,6 +31,7 @@ public class EnemyCombat : MonoBehaviour
     {
         _combatActive = true;
     }
+
     public void StopCombat()
     {
         _combatActive = false;
@@ -35,43 +41,82 @@ public class EnemyCombat : MonoBehaviour
 
     public void Tick(Transform target)
     {
-        if (!_combatActive || target == null || _isAttacking) return;
+        if (!_combatActive || target == null || _isAttacking)
+            return;
+
         _target = target;
-        if (Vector3.Distance(transform.position, target.position) > _attackDistance) return;
-        if (Time.time < _nextAttackTime) return;
+
+        FaceTarget(target);
+
+        Vector3 direction = target.position - _enemyVisuals.position;
+        direction.y = 0f;
+
+        float angle = Vector3.Angle(_enemyVisuals.forward, direction);
+
+        if (angle > _rotationThreshold)
+            return;
+
+        if ((transform.position - target.position).sqrMagnitude > _attackDistance * _attackDistance)
+            return;
+
+        if (Time.time < _nextAttackTime)
+            return;
 
         _isAttacking = true;
         _nextAttackTime = Time.time + _attackCooldown;
 
-        FaceTarget(target);
         _enemyAnimator?.PlayAttack();
     }
 
     private void FaceTarget(Transform target)
     {
-        Vector3 direction = target.position - transform.position;
+        Vector3 direction = target.position - _enemyVisuals.position;
         direction.y = 0f;
-        if (direction.magnitude > 0.0001f)
-        {
-            transform.rotation = Quaternion.LookRotation(direction);
-        }
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        _enemyVisuals.rotation = Quaternion.RotateTowards(
+            _enemyVisuals.rotation,
+            targetRotation,
+            _rotationSpeed * Time.deltaTime
+        );
     }
 
     public void DealDamage()
     {
-        if (!_combatActive || _target == null) return;
+        if (!_combatActive || _target == null)
+            return;
 
-        if (Vector3.Distance(transform.position, _target.position) > _attackDistance + 0.5f) return;
+        float maxDistance = _attackDistance + 0.5f;
 
-        Vector3 origin = _attackPoint != null ? _attackPoint.position : transform.position + Vector3.up;
+        if ((transform.position - _target.position).sqrMagnitude >
+            maxDistance * maxDistance)
+            return;
 
-        Collider[] hits = Physics.OverlapSphere(origin, _attackRadius, _targetLayers);
+        Vector3 origin = _attackPoint != null
+            ? _attackPoint.position
+            : transform.position + Vector3.up;
+
+        Collider[] hits = Physics.OverlapSphere(
+            origin,
+            _attackRadius,
+            _targetLayers
+        );
+
         HashSet<IDamagable> damagedTargets = new HashSet<IDamagable>();
 
         foreach (Collider hit in hits)
         {
             IDamagable targetHealth = hit.GetComponent<IDamagable>();
-            if (targetHealth == null || targetHealth.IsDead) continue;
+
+            if (targetHealth == null || targetHealth.IsDead)
+                continue;
+
+            if (!damagedTargets.Add(targetHealth))
+                continue;
 
             targetHealth.TakeDamage(_damage, _gameAgent);
         }

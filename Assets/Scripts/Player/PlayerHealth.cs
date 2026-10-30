@@ -1,51 +1,74 @@
+
+using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class PlayerHealth : MonoBehaviour, IDamagable
 {
     [SerializeField] private Animator _animator;
-    [SerializeField] private float _maxHealth;
-    private bool isDead = false;
+    [SerializeField] private float _maxHealth = 100f;
+
+    private bool _isDead;
     private float _health;
 
-    [Header("Events")]
-    [SerializeField] private UnityEvent<float> HpChangedPercent;
-    [SerializeField] private UnityEvent Die;
-    public float Health { 
-        get { return _health; }
-        private set { _health = value; }
+    public event Action<float> OnHealthChanged;
+    public event Action OnDied;
+
+    public float Health => _health;
+    public float MaxHealth => _maxHealth;
+    public bool IsDead {
+        get { return _isDead; }
+        set { _isDead = value;}
     }
-    public float MaxHealth { 
-        get { return _maxHealth; } 
-        private set { _maxHealth = value; }
-    }
-    public bool IsDead
+
+    private void Awake()
     {
-        get { return isDead; }
-        set {  isDead = value; }
+        _health = _maxHealth;
     }
 
     private void Start()
     {
-        _health = _maxHealth;
+        OnHealthChanged?.Invoke(_health / _maxHealth);
     }
+
     public void TakeDamage(float damage, GameAgent sender)
     {
-        if (IsDead) { return; }
+        if (_isDead || damage <= 0f)
+            return;
 
-        Debug.Log($"{gameObject.name} took damage: {damage} from {sender.name}: {sender.entityFaction}");
-        Health -= damage;
-        HpChangedPercent?.Invoke(_health / _maxHealth);
-
-        if (_animator == null) { return; }
-        
-        _animator.SetTrigger("GetHit");
-        if (Health <= 0)
+        Debug.Log($"{gameObject.name} took damage: {damage}");
+        Debug.Log($"Before hit: {_health}");
+        HealthChange(damage);
+        Debug.Log($"After hit: {_health}");
+        if (sender != null)
         {
-            IsDead = true;
-            _animator.SetTrigger("Die");
-            _animator.SetBool("IsDead", isDead);
-            Die?.Invoke();
+            Debug.Log($"Damage from {sender.name}: {sender.entityFaction}");
         }
+
+        if (_health <= 0f)
+        {
+            Die();
+            return;
+        }
+
+        _animator?.SetTrigger("GetHit");
+    }
+
+    private void HealthChange(float amount)
+    {
+        _health -= amount;
+        OnHealthChanged?.Invoke(_health / _maxHealth);
+    }
+
+    private void Die()
+    {
+        if (_isDead)
+            return;
+
+        _isDead = true;
+
+        _animator?.SetTrigger("Die");
+        _animator?.SetBool("IsDead", true);
+
+        OnDied?.Invoke();
     }
 }

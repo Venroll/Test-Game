@@ -55,6 +55,9 @@ MonoBehaviour:
   _attackRadius: 3
   _attackCooldown: 1.2
   _attackDistance: 2
+  _enemyVisuals: {fileID: 1161720573245580210}
+  _rotationSpeed: 360
+  _rotationThreshold: 5
 --- !u!1 &1483938894751457167
 GameObject:
   m_ObjectHideFlags: 0
@@ -1206,6 +1209,9 @@ MonoBehaviour:
   _player: {fileID: 0}
   _viewDistance: 10
   _viewAngle: 120
+  _rearViewDistance: 5
+  _rearViewAngle: 90
+  _rearDetectionTime: 1
   _eyes: {fileID: 0}
   _obstacleLayers:
     serializedVersion: 2

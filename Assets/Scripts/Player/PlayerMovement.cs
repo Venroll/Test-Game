@@ -16,16 +16,23 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private string _speedParam = "Speed";
 
     [Header("Links")]
+    private PlayerHealth _playerHealth;
     [SerializeField] private InputActionReference _moveAction;
     [SerializeField] private InputActionReference _jumpAction;
 
+    private void Awake()
+    {
+        _playerHealth = GetComponentInParent<PlayerHealth>();
+    }
     private void OnEnable()
     {
+        _playerHealth.OnDied += DisableMovement;
         _moveAction.action.Enable();
         _jumpAction.action.Enable();
     }
     private void OnDisable()
     {
+        _playerHealth.OnDied -= DisableMovement;
         _moveAction.action.Disable();
         _jumpAction.action.Disable();
     }

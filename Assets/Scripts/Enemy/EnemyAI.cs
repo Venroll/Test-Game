@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -34,7 +35,9 @@ public class EnemyAI : MonoBehaviour
         {
             ChangeState(EnemyState.Dead);
         }
-        if (_currentState == EnemyState.Dead) return;
+
+        if (_currentState == EnemyState.Dead)
+            return;
 
         UpdateTarget();
         UpdateState();
@@ -43,24 +46,30 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdateTarget()
     {
-        if (_target != null && _detection.CanSeeTarget(_target))
+        if (_target != null)
         {
-            _lastSeenTime = Time.time;
+            if (_detection != null && _detection.CanSeeTarget(_target))
+            {
+                _lastSeenTime = Time.time;
+                return;
+            }
+
+            if (Time.time - _lastSeenTime >= _losePlayerDelay)
+            {
+                _target = null;
+            }
+
             return;
         }
 
-        Transform visibleTarget = _detection != null ? _detection.FindVisibleTarget() : null;
+        Transform visibleTarget = _detection != null
+            ? _detection.FindVisibleTarget()
+            : null;
 
         if (visibleTarget != null)
         {
             _target = visibleTarget;
             _lastSeenTime = Time.time;
-            return;
-        }
-
-        if (_target != null && Time.time - _lastSeenTime >= _losePlayerDelay)
-        {
-            _target = null;
         }
     }
 
@@ -73,12 +82,9 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        float distance = Vector3.Distance(
-            transform.position,
-            _target.position
-        );
+        float distanceSqr = (transform.position - _target.position).sqrMagnitude;
 
-        if (distance <= _attackRange)
+        if (distanceSqr <= _attackRange * _attackRange)
         {
             ChangeState(EnemyState.Attack);
             _combat?.Tick(_target);
@@ -88,7 +94,10 @@ public class EnemyAI : MonoBehaviour
             ChangeState(EnemyState.Chase);
 
             if (_agent != null && _agent.isOnNavMesh)
+            {
+                _agent.isStopped = false;
                 _agent.SetDestination(_target.position);
+            }
         }
     }
 
@@ -97,7 +106,9 @@ public class EnemyAI : MonoBehaviour
         if (_enemyAnim == null)
             return;
 
-        float speed = _agent != null && _agent.isOnNavMesh ? _agent.velocity.magnitude: 0f;
+        float speed = _agent != null && _agent.isOnNavMesh
+            ? _agent.velocity.magnitude
+            : 0f;
 
         _enemyAnim.SetSpeed(speed);
     }
@@ -113,23 +124,34 @@ public class EnemyAI : MonoBehaviour
         {
             case EnemyState.Patrol:
                 _combat?.StopCombat();
-                _agent.isStopped = false;
+
+                if (_agent != null)
+                    _agent.isStopped = false;
                 break;
 
             case EnemyState.Chase:
                 _combat?.StopCombat();
-                _agent.isStopped = false;
+
+                if (_agent != null)
+                    _agent.isStopped = false;
                 break;
 
             case EnemyState.Attack:
-                _agent.isStopped = true;
+                if (_agent != null)
+                    _agent.isStopped = true;
+
                 _combat?.StartCombat();
                 break;
 
             case EnemyState.Dead:
                 _target = null;
-                _agent.isStopped = true;
-                _agent.ResetPath();
+
+                if (_agent != null)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                }
+
                 _combat?.StopCombat();
                 _enemyAnim?.PlayDeath();
                 break;
