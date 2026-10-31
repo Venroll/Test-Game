@@ -126,4 +126,9 @@ public class EnemyCombat : MonoBehaviour
     {
         _isAttacking = false;
     }
+    public void CancelAttack()
+    {
+        _isAttacking = false;
+        _enemyAnimator?.ResetAttackTrigger();
+    }
 }

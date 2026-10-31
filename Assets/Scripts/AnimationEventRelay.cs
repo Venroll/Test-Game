@@ -18,4 +18,9 @@ public class AnimationEventRelay : MonoBehaviour
     {
         _weaponAttack.AttackFinished();
     }
+
+    public void FinishHitReaction()
+    {
+        _weaponAttack?.FinishHitReaction();
+    }
 }

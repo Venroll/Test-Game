@@ -16,16 +16,24 @@ public class WeaponAttack : MonoBehaviour
     [SerializeField] private Transform attackPoint;
     [SerializeField] private LayerMask targetLayers;
 
+    [Header("Rage")]
+    [SerializeField] private PlayerRage _playerRage;
+    [SerializeField] private PlayerHealth _playerHealth;
+    [SerializeField] private float _lifestealPercent = 0.3f;
+
     private GameAgent gameAgent;
     private bool isAttacking;
+    private bool isGettingHit;
     private float nextAttackTime;
 
     private void Awake()
     {
         if (gameAgent == null)
-        {
             gameAgent = GetComponentInParent<GameAgent>();
-        }
+        if (_playerRage == null)
+            _playerRage = GetComponentInParent<PlayerRage>();
+        if (_playerHealth == null)
+            _playerHealth = GetComponentInParent<PlayerHealth>();
     }
 
     private void Update()
@@ -38,7 +46,7 @@ public class WeaponAttack : MonoBehaviour
 
     private void TryAttack()
     {
-        if (isAttacking || Time.time < nextAttackTime)
+        if (isAttacking || isGettingHit || Time.time < nextAttackTime)
             return;
 
         isAttacking = true;
@@ -70,10 +78,29 @@ public class WeaponAttack : MonoBehaviour
                 continue;
 
             target.TakeDamage(_damage, gameAgent);
+
+            _playerRage?.AddRageFromDamageDealt(_damage);
+
+            if (_playerRage != null && _playerRage.IsBerserk)
+            {
+                float healAmount = _damage * _lifestealPercent;
+                _playerHealth?.Heal(healAmount);
+            }
         }
     }
     public void AttackFinished()
     {
         isAttacking = false;
+    }
+    public void StartHitReaction()
+    {
+        isAttacking = false;
+        isGettingHit = true;
+
+        _animator.ResetTrigger(_attackTrigger);
+    }
+    public void FinishHitReaction()
+    {
+        isGettingHit = false;
     }
 }

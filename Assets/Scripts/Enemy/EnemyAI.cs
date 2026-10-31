@@ -19,9 +19,12 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private EnemyHealth _health;
     [SerializeField] private EnemyAnimator _enemyAnim;
 
+    [SerializeField] private EnemyArenaManager _arenaManager;
+
     [SerializeField] private float _attackRange = 2f;
     [SerializeField] private float _losePlayerDelay = 3f;
 
+    private bool _isInCombat;
     private EnemyState _currentState = EnemyState.Patrol;
     private Transform _target;
     private float _lastSeenTime;
@@ -118,7 +121,20 @@ public class EnemyAI : MonoBehaviour
         if (_currentState == newState)
             return;
 
+        bool wasInCombat =
+        _currentState == EnemyState.Chase ||
+        _currentState == EnemyState.Attack;
+
+        bool willBeInCombat =
+            newState == EnemyState.Chase ||
+            newState == EnemyState.Attack;
+
         _currentState = newState;
+
+        if (!wasInCombat && willBeInCombat)
+            EnterCombat();
+        else if (wasInCombat && !willBeInCombat)
+            ExitCombat();
 
         switch (_currentState)
         {
@@ -156,5 +172,22 @@ public class EnemyAI : MonoBehaviour
                 _enemyAnim?.PlayDeath();
                 break;
         }
+    }
+    private void EnterCombat()
+    {
+        if (_isInCombat)
+            return;
+
+        _isInCombat = true;
+        _arenaManager?.EnemyEnteredCombat();
+    }
+
+    private void ExitCombat()
+    {
+        if (!_isInCombat)
+            return;
+
+        _isInCombat = false;
+        _arenaManager?.EnemyLeftCombat();
     }
 }

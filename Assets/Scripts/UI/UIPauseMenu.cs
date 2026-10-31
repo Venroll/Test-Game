@@ -43,6 +43,11 @@ public class UIPauseMenu : MonoBehaviour
     {
         SceneManager.LoadScene(0);
     }
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     private void ActivatePause()
     {
         Time.timeScale = 0f;
@@ -67,6 +72,7 @@ public class UIPauseMenu : MonoBehaviour
         IsPaused = true;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        MusicManager.Instance.PlayDefeatMusic();
     }
     public void ActivateWinMenu()
     {
@@ -77,5 +83,6 @@ public class UIPauseMenu : MonoBehaviour
         _cameraMovement.enabled = false;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        MusicManager.Instance.PlayVictoryMusic();
     }
 }

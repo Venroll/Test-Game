@@ -51,4 +51,8 @@ public class EnemyAnimator : MonoBehaviour
             _animator.SetTrigger(_deathHash);
         }
     }
+    public void ResetAttackTrigger()
+    {
+        _animator.ResetTrigger("Attack");
+    }
 }
